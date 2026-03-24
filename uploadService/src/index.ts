@@ -6,9 +6,13 @@ import path from 'path';
 import { getAllFiles } from './file';
 import { uploadFile } from './aws';
 import { createClient } from 'redis'
+import { subscribe } from 'diagnostics_channel';
 
 const publisher = createClient();
 publisher.connect();
+
+const subscriber = createClient();
+subscriber.connect();
 
 const app = express();
 app.use(cors());
@@ -22,13 +26,25 @@ app.post('/deploy', async (req, res) => {
     await simpleGit().clone(repoUrl, path.join(__dirname, `output/${id}`));
     const file = getAllFiles(path.join(__dirname, `output/${id}`));
 
-    file.forEach(async file => {
-        await uploadFile(file.slice(__dirname.length + 1), file);
-    })
+    await Promise.all(
+        file.map(file =>
+            uploadFile(file.slice(__dirname.length + 1), file)
+        )
+    );
 
     publisher.lPush("build-queue", id);
 
+    publisher.hSet("status", id, "uploaded");
+
     res.json({id});
+})
+
+app.get("/status", async (req, res) => {
+    const id = req.query.id;
+    const response = await subscriber.hGet("status", id as string);
+    res.json({
+        status: response
+    })
 })
 app.listen(3000);
 
