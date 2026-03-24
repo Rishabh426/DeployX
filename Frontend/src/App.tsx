@@ -89,7 +89,7 @@ export default function Landing() {
 
           <button className="w-full mt-4 border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition">
             <a
-              href={`http://${uploadId}.rishabh.dev.com:3001/index.html`}
+              href={`http://${uploadId}.localhost:3001/index.html`}
               target="_blank"
               rel="noreferrer"
             >
