@@ -1,15 +1,22 @@
 import express from "express";
+import cors from "cors";
 import jwt from "jsonwebtoken";
 import { prisma } from "./lib/prisma.js";
 
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 app.post("/signup", async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { name, password, email } = req.body;
 
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
@@ -59,4 +66,4 @@ app.post("/logout", (req, res) => {
     .json({ message: "Logged out — delete the token on client side" });
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.listen(8080, () => console.log("Server running on port 8080"));
