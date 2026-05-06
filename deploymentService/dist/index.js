@@ -16,19 +16,27 @@ const subscriber = (0, redis_1.createClient)();
 subscriber.connect();
 const publisher = (0, redis_1.createClient)();
 publisher.connect();
+let uniqueId = "0";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        while (1) {
-            const response = yield subscriber.brPop("build-queue", 0);
-            console.log(response);
-            const id = response === null || response === void 0 ? void 0 : response.element;
-            yield (0, aws_1.downloadS3Folder)(`output/${response === null || response === void 0 ? void 0 : response.element}`);
-            console.log("Downloaded");
-            if (id) {
-                yield (0, utils_1.buildProject)(id);
-                (0, aws_1.copyFinalDist)(id);
-                publisher.hSet("status", id, "deployed");
+        try {
+            while (1) {
+                const response = yield subscriber.brPop("build-queue", 0);
+                console.log(response);
+                const id = response === null || response === void 0 ? void 0 : response.element;
+                uniqueId = id;
+                yield (0, aws_1.downloadS3Folder)(`output/${response === null || response === void 0 ? void 0 : response.element}`);
+                console.log("Downloaded");
+                if (id) {
+                    yield (0, utils_1.buildProject)(id);
+                    (0, aws_1.copyFinalDist)(id);
+                    publisher.hSet("status", id, "deployed");
+                }
             }
+        }
+        catch (e) {
+            console.log(`Deployment failed: ${uniqueId}`);
+            yield publisher.hSet("status", uniqueId, "failed");
         }
     });
 }

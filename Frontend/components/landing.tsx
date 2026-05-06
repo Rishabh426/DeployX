@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const BACKEND_UPLOAD_URL = "http://localhost:3000";
@@ -64,6 +65,7 @@ const CheckIcon = () => (
 );
 
 export default function Landing() {
+  const navigate = useNavigate();
   const [repoUrl, setRepoUrl] = useState("");
   const [uploadId, setUploadId] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -74,20 +76,60 @@ export default function Landing() {
   const visitUrl = `http://${uploadId}.localhost:3001/index.html`;
 
   const handleDeploy = async () => {
-    setUploading(true);
-    const res = await axios.post(`${BACKEND_UPLOAD_URL}/deploy`, { repoUrl });
-    setUploadId(res.data.id);
-    setUploading(false);
+    const startTime = Date.now();
 
-    const interval = setInterval(async () => {
-      const response = await axios.get(
-        `${BACKEND_UPLOAD_URL}/status?id=${res.data.id}`,
-      );
-      if (response.data.status === "deployed") {
-        clearInterval(interval);
-        setDeployed(true);
-      }
-    }, 3000);
+    try {
+      setUploading(true);
+
+      const res = await axios.post(`${BACKEND_UPLOAD_URL}/deploy`, { repoUrl });
+      const deploymentId = res.data.id;
+      setUploadId(deploymentId);
+      setUploading(false);
+
+      const interval = setInterval(async () => {
+        try {
+          const response = await axios.get(
+            `${BACKEND_UPLOAD_URL}/status?id=${deploymentId}`,
+          );
+
+          if (response.data.status === "deployed") {
+            clearInterval(interval);
+            setDeployed(true);
+          }
+
+          if (response.data.status === "failed") {
+            clearInterval(interval);
+            navigate("/deploy-failed", {
+              state: {
+                repoUrl,
+                deploymentId,
+                timeTaken: Math.round((Date.now() - startTime) / 1000),
+              },
+            });
+          }
+        } catch (err) {
+          console.log(err);
+          clearInterval(interval);
+          navigate("/deploy-failed", {
+            state: {
+              repoUrl,
+              deploymentId,
+              timeTaken: Math.round((Date.now() - startTime) / 1000),
+            },
+          });
+        }
+      }, 5000);
+    } catch (err) {
+      console.log(err);
+      setUploading(false);
+      navigate("/deploy-failed", {
+        state: {
+          repoUrl,
+          deploymentId: uploadId || "N/A",
+          timeTaken: Math.round((Date.now() - startTime) / 1000),
+        },
+      });
+    }
   };
 
   const handleCopy = () => {
@@ -99,21 +141,18 @@ export default function Landing() {
   const isDeploying = uploadId !== "" && !deployed;
 
   return (
-    <main className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-sans">
-      {/* Radial glow */}
+    <main className="min-h-screen h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-sans overflow-hidden">
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full bg-violet-900/10 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md flex flex-col gap-5">
-        {/* Brand */}
         <div className="flex items-center gap-2 justify-center mb-3">
           <span className="text-white font-semibold text-lg tracking-tight">
             DeployX
           </span>
         </div>
 
-        {/* Deploy Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl shadow-black/50">
           <div className="mb-7">
             <h2 className="text-xl font-semibold text-white mb-1">
@@ -125,7 +164,6 @@ export default function Landing() {
           </div>
 
           <div className="flex flex-col gap-5">
-            {/* Input */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium tracking-widest uppercase text-zinc-400">
                 GitHub Repository URL
@@ -145,7 +183,6 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Deploy button */}
             <button
               onClick={handleDeploy}
               disabled={!repoUrl || uploadId !== "" || uploading}
@@ -213,7 +250,6 @@ export default function Landing() {
             </button>
           </div>
 
-          {/* Deploying progress indicator */}
           {isDeploying && (
             <div className="mt-5 flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs text-zinc-500">
@@ -230,7 +266,6 @@ export default function Landing() {
         {/* Deployment Result Card */}
         {deployed && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl shadow-black/50 animate-fadeIn">
-            {/* Status badge */}
             <div className="flex items-center gap-2 mb-6">
               <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-900/30 border border-emerald-800/50 rounded-full px-3 py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -246,7 +281,6 @@ export default function Landing() {
               Your site is live and accessible at the URL below.
             </p>
 
-            {/* URL row */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium tracking-widest uppercase text-zinc-400">
                 Deployed URL
@@ -266,8 +300,6 @@ export default function Landing() {
                 </button>
               </div>
             </div>
-
-            {/* Visit button */}
             <a
               href={visitUrl}
               target="_blank"
@@ -291,9 +323,7 @@ export default function Landing() {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.35s ease forwards;
-        }
+        .animate-fadeIn { animation: fadeIn 0.35s ease forwards; }
       `}</style>
     </main>
   );

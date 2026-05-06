@@ -26,10 +26,12 @@ const s3 = new aws_sdk_1.S3({
 function downloadS3Folder(prefix) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
-        const allFiles = yield s3.listObjectsV2({
+        const allFiles = yield s3
+            .listObjectsV2({
             Bucket: "deployx",
             Prefix: prefix,
-        }).promise();
+        })
+            .promise();
         const allPromise = ((_a = allFiles.Contents) === null || _a === void 0 ? void 0 : _a.map((_a) => __awaiter(this, [_a], void 0, function* ({ Key }) {
             return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
                 if (!Key) {
@@ -45,13 +47,16 @@ function downloadS3Folder(prefix) {
                 s3.getObject({
                     Bucket: "deployx",
                     Key,
-                }).createReadStream().pipe(outputFile).on("finish", () => {
+                })
+                    .createReadStream()
+                    .pipe(outputFile)
+                    .on("finish", () => {
                     resolve("");
                 });
             }));
         }))) || [];
         console.log("awaiting");
-        yield Promise.all(allPromise === null || allPromise === void 0 ? void 0 : allPromise.filter(x => x !== undefined));
+        yield Promise.all(allPromise === null || allPromise === void 0 ? void 0 : allPromise.filter((x) => x !== undefined));
     });
 }
 function copyFinalDist(id) {
@@ -63,18 +68,20 @@ function copyFinalDist(id) {
 }
 const uploadFile = (filename, localfilePath) => __awaiter(void 0, void 0, void 0, function* () {
     const fileContent = fs_1.default.readFileSync(localfilePath);
-    const response = yield s3.upload({
+    const response = yield s3
+        .upload({
         Body: fileContent,
         Bucket: "deployx",
         Key: filename,
-    }).promise();
+    })
+        .promise();
     console.log(response);
 });
 exports.uploadFile = uploadFile;
 const getAllFiles = (folderPath) => {
     let response = [];
     const allFilesandFolders = fs_1.default.readdirSync(folderPath);
-    allFilesandFolders.forEach(file => {
+    allFilesandFolders.forEach((file) => {
         const fullFilePath = path_1.default.join(folderPath, file);
         if (fs_1.default.statSync(fullFilePath).isDirectory()) {
             response = response.concat((0, exports.getAllFiles)(fullFilePath));

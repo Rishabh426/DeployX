@@ -4,7 +4,6 @@ import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 
 type AuthMode = "login" | "signup";
-
 type FormField = "name" | "email" | "password" | "confirm";
 
 interface FormState {
@@ -17,7 +16,6 @@ interface FormState {
 interface EyeIconProps {
   open: boolean;
 }
-
 interface InputFieldProps {
   label: string;
   type: string;
@@ -139,28 +137,17 @@ export default function AuthComponent(): React.ReactElement {
         mode === "login"
           ? "http://localhost:8080/login"
           : "http://localhost:8080/signup";
-
       const body =
         mode === "login"
-          ? {
-              email: form.email,
-              password: form.password,
-            }
-          : {
-              name: form.name,
-              email: form.email,
-              password: form.password,
-            };
+          ? { email: form.email, password: form.password }
+          : { name: form.name, email: form.email, password: form.password };
 
       const res = await axios.post(endpoint, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
 
       setSuccess(true);
-
       console.log("Response:", res.data);
       navigate("/");
     } catch (err: unknown) {
@@ -178,7 +165,7 @@ export default function AuthComponent(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen h-screen bg-zinc-950 flex items-center justify-center p-4 font-sans overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full bg-violet-900/10 blur-3xl" />
       </div>
@@ -262,7 +249,6 @@ export default function AuthComponent(): React.ReactElement {
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -322,14 +308,12 @@ export default function AuthComponent(): React.ReactElement {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-zinc-800" />
             <span className="text-xs text-zinc-600">or continue with</span>
             <div className="flex-1 h-px bg-zinc-800" />
           </div>
 
-          {/* Footer */}
           <p className="text-center text-xs text-zinc-600 mt-6">
             {mode === "login"
               ? "Don't have an account? "
