@@ -71,6 +71,7 @@ export default function Landing() {
   const [uploading, setUploading] = useState(false);
   const [deployed, setDeployed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const deployedUrl = `http://${uploadId}.rishabh.dev.com:3001/index.html`;
   const visitUrl = `http://${uploadId}.localhost:3001/index.html`;
@@ -119,9 +120,25 @@ export default function Landing() {
           });
         }
       }, 5000);
-    } catch (err) {
+    } catch (err: unknown) {
       console.log(err);
+
       setUploading(false);
+
+      let msg = "Something went wrong";
+
+      if (axios.isAxiosError(err)) {
+        msg = err.response?.data?.message || msg;
+      }
+
+      if (
+        msg === "Invalid repository" ||
+        msg.includes("Private repositories")
+      ) {
+        setErrorMsg(msg);
+        return;
+      }
+
       navigate("/deploy-failed", {
         state: {
           repoUrl,
@@ -176,11 +193,37 @@ export default function Landing() {
                   type="text"
                   placeholder="https://github.com/username/repo"
                   value={repoUrl}
-                  onChange={(e) => setRepoUrl(e.target.value)}
+                  onChange={(e) => {
+                    setRepoUrl(e.target.value);
+                    setErrorMsg("");
+                  }}
                   disabled={uploadId !== ""}
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg pl-9 pr-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full bg-zinc-900 border rounded-lg pl-9 pr-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    errorMsg
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/40"
+                      : "border-zinc-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                  }`}
                 />
               </div>
+              {errorMsg && (
+                <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  {errorMsg}
+                </p>
+              )}
             </div>
 
             <button
@@ -263,7 +306,6 @@ export default function Landing() {
           )}
         </div>
 
-        {/* Deployment Result Card */}
         {deployed && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl shadow-black/50 animate-fadeIn">
             <div className="flex items-center gap-2 mb-6">
