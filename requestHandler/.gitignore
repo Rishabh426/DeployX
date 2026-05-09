@@ -2,3 +2,4 @@ node_modules/
 .envnode_modules/
 output/
 dist/node_modules/
+.env.local

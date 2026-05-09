@@ -17,7 +17,14 @@ export default function App() {
           }
         />
         <Route path="/auth" element={<AuthComponent />} />
-        <Route path="/deploy-failed" element={<DeployFailed />} />
+        <Route
+          path="/deploy-failed"
+          element={
+            <ProtectedRoute>
+              <DeployFailed />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

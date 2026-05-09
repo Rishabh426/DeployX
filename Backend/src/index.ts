@@ -59,8 +59,9 @@ app.post("/signup", async (req, res) => {
     const user = await prisma.user.create({
       data: { email, password, name },
     });
-
-    res.status(201).json({ message: "User created successfully" });
+    res
+      .status(201)
+      .json({ message: "User created successfully", name: user.name });
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: "Internal server error" });
@@ -69,13 +70,6 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    const jwt_token = localStorage.getItem("token");
-
-    if (jwt_token) {
-      res.status(200).json({ jwt_token });
-      return;
-    }
-
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -92,8 +86,7 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
       expiresIn: "5d",
     });
-    localStorage.setItem("token", token);
-    res.status(200).json({ token });
+    res.status(200).json({ token, name: user.name });
   } catch (e) {
     res.status(500).json({ error: "Internal server error" });
   }

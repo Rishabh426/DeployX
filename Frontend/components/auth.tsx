@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 
 type AuthMode = "login" | "signup";
@@ -146,10 +147,13 @@ export default function AuthComponent(): React.ReactElement {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-
+      console.log(res);
+      console.log(res.data.name);
+      localStorage.setItem("name", res.data.name);
+      localStorage.setItem("token", res.data.token);
       setSuccess(true);
       console.log("Response:", res.data);
-      navigate("/");
+      navigate("/landing");
     } catch (err: unknown) {
       console.error(err as AxiosError);
       alert("Error while auth");
@@ -165,14 +169,14 @@ export default function AuthComponent(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen h-screen bg-zinc-950 flex items-center justify-center p-4 font-sans overflow-hidden">
+    <div className="min-h-screen h-screen bg-zinc-800 flex items-center justify-center p-4 font-sans overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full bg-violet-900/10 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
         <div className="flex items-center gap-2 mb-8 justify-center">
-          <span className="text-white font-semibold text-lg tracking-tight">
+          <span className=" text-white font-semibold text-lg tracking-tight">
             DeployX
           </span>
         </div>
@@ -238,7 +242,7 @@ export default function AuthComponent(): React.ReactElement {
               onToggle={() => setShowPassword((v) => !v)}
             />
 
-            {mode === "login" && (
+            {/*{mode === "login" && (
               <div className="flex justify-end -mt-1">
                 <button
                   type="button"
@@ -247,7 +251,7 @@ export default function AuthComponent(): React.ReactElement {
                   Forgot password?
                 </button>
               </div>
-            )}
+            )}*/}
 
             <button
               type="submit"

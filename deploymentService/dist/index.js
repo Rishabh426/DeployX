@@ -19,8 +19,8 @@ publisher.connect();
 let uniqueId = "0";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            while (1) {
+        while (1) {
+            try {
                 const response = yield subscriber.brPop("build-queue", 0);
                 console.log(response);
                 const id = response === null || response === void 0 ? void 0 : response.element;
@@ -33,10 +33,10 @@ function main() {
                     publisher.hSet("status", id, "deployed");
                 }
             }
-        }
-        catch (e) {
-            console.log(`Deployment failed: ${uniqueId}`);
-            yield publisher.hSet("status", uniqueId, "failed");
+            catch (e) {
+                console.log(`Deployment failed: ${uniqueId}`);
+                yield publisher.hSet("status", uniqueId, "failed");
+            }
         }
     });
 }

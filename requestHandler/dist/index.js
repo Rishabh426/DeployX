@@ -26,12 +26,17 @@ app.get(/.*/, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filepath = req.path;
     console.log(filepath);
     console.log(`dist/${id}${filepath}`);
-    const contents = yield s3.getObject({
+    const contents = yield s3
+        .getObject({
         Bucket: "deployx",
         Key: `dist/${id}${filepath}`,
-    }).promise();
-    const type = filepath.endsWith("html") ? "text/html" : filepath.endsWith("css") ?
-        "text/css" : "application/javascript";
+    })
+        .promise();
+    const type = filepath.endsWith("html")
+        ? "text/html"
+        : filepath.endsWith("css")
+            ? "text/css"
+            : "application/javascript";
     res.set("Content-Type", type);
     res.send(contents.Body);
 }));

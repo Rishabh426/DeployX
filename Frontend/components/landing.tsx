@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -66,12 +66,17 @@ const CheckIcon = () => (
 
 export default function Landing() {
   const navigate = useNavigate();
+
   const [repoUrl, setRepoUrl] = useState("");
   const [uploadId, setUploadId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [deployed, setDeployed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [previousDeployments, setPreviousDeployments] = useState([]);
+
+  const name = localStorage.getItem("name") || "User";
+  const userInitial = name.charAt(0).toUpperCase();
 
   const deployedUrl = `http://${uploadId}.rishabh.dev.com:3001/index.html`;
   const visitUrl = `http://${uploadId}.localhost:3001/index.html`;
@@ -82,9 +87,14 @@ export default function Landing() {
     try {
       setUploading(true);
 
-      const res = await axios.post(`${BACKEND_UPLOAD_URL}/deploy`, { repoUrl });
+      const res = await axios.post(`${BACKEND_UPLOAD_URL}/deploy`, {
+        repoUrl,
+      });
+
       const deploymentId = res.data.id;
+
       setUploadId(deploymentId);
+
       setUploading(false);
 
       const interval = setInterval(async () => {
@@ -100,6 +110,7 @@ export default function Landing() {
 
           if (response.data.status === "failed") {
             clearInterval(interval);
+
             navigate("/deploy-failed", {
               state: {
                 repoUrl,
@@ -110,7 +121,9 @@ export default function Landing() {
           }
         } catch (err) {
           console.log(err);
+
           clearInterval(interval);
+
           navigate("/deploy-failed", {
             state: {
               repoUrl,
@@ -151,30 +164,75 @@ export default function Landing() {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(deployedUrl);
+
     setCopied(true);
+
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+
+    navigate("/auth");
   };
 
   const isDeploying = uploadId !== "" && !deployed;
 
+  useEffect(() => {
+    const fetchDeployments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(`${BACKEND_UPLOAD_URL}/deployments`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setPreviousDeployments(response.data.slice(0, 3));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchDeployments();
+  }, []);
+
   return (
-    <main className="min-h-screen h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-sans overflow-hidden">
+    <main className="min-h-screen bg-zinc-950 font-sans overflow-y-auto">
+      <nav className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-white text-lg font-semibold tracking-tight">
+            DeployX
+          </h1>
+
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-violet-900/30">
+              {userInitial}
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-800 hover:text-white transition-all duration-150"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full bg-violet-900/10 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md flex flex-col gap-5">
-        <div className="flex items-center gap-2 justify-center mb-3">
-          <span className="text-white font-semibold text-lg tracking-tight">
-            DeployX
-          </span>
-        </div>
-
+      <div className="relative w-full max-w-md mx-auto flex flex-col gap-5 py-10 px-4">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl shadow-black/50">
           <div className="mb-7">
             <h2 className="text-xl font-semibold text-white mb-1">
               Deploy your repository
             </h2>
+
             <p className="text-sm text-zinc-500">
               Enter a GitHub repository URL to instantly deploy it.
             </p>
@@ -185,10 +243,12 @@ export default function Landing() {
               <label className="text-xs font-medium tracking-widest uppercase text-zinc-400">
                 GitHub Repository URL
               </label>
+
               <div className="relative flex items-center">
                 <span className="absolute left-3 text-zinc-600">
                   <GitHubIcon />
                 </span>
+
                 <input
                   type="text"
                   placeholder="https://github.com/username/repo"
@@ -205,22 +265,9 @@ export default function Landing() {
                   }`}
                 />
               </div>
+
               {errorMsg && (
                 <p className="text-xs text-red-400 flex items-center gap-1.5 mt-0.5">
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
                   {errorMsg}
                 </p>
               )}
@@ -229,59 +276,16 @@ export default function Landing() {
             <button
               onClick={handleDeploy}
               disabled={!repoUrl || uploadId !== "" || uploading}
-              className={`w-full py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2
-                ${
-                  deployed
-                    ? "bg-emerald-600 text-white"
-                    : "bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                }`}
+              className={`w-full py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                deployed
+                  ? "bg-emerald-600 text-white"
+                  : "bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              }`}
             >
               {uploading ? (
-                <>
-                  <svg
-                    className="animate-spin w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4l3-3-3-3V4a10 10 0 100 16v-2a8 8 0 01-8-8z"
-                    />
-                  </svg>
-                  Uploading…
-                </>
+                <>Uploading…</>
               ) : isDeploying ? (
-                <>
-                  <svg
-                    className="animate-spin w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4l3-3-3-3V4a10 10 0 100 16v-2a8 8 0 01-8-8z"
-                    />
-                  </svg>
-                  Deploying · {uploadId}
-                </>
+                <>Deploying · {uploadId}</>
               ) : deployed ? (
                 <>
                   <CheckIcon />
@@ -292,18 +296,6 @@ export default function Landing() {
               )}
             </button>
           </div>
-
-          {isDeploying && (
-            <div className="mt-5 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs text-zinc-500">
-                <span>Building & deploying…</span>
-                <span className="text-zinc-600">{uploadId}</span>
-              </div>
-              <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                <div className="h-full bg-violet-600 rounded-full animate-pulse w-2/3" />
-              </div>
-            </div>
-          )}
         </div>
 
         {deployed && (
@@ -313,12 +305,14 @@ export default function Landing() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live
               </span>
+
               <span className="text-xs text-zinc-600">{uploadId}</span>
             </div>
 
             <h2 className="text-xl font-semibold text-white mb-1">
               Deployment Complete
             </h2>
+
             <p className="text-sm text-zinc-500 mb-6">
               Your site is live and accessible at the URL below.
             </p>
@@ -327,12 +321,14 @@ export default function Landing() {
               <label className="text-xs font-medium tracking-widest uppercase text-zinc-400">
                 Deployed URL
               </label>
+
               <div className="flex items-center gap-2">
                 <input
                   readOnly
                   value={deployedUrl}
                   className="flex-1 bg-zinc-800/60 border border-zinc-700 rounded-lg px-4 py-3 text-sm text-zinc-300 outline-none select-all cursor-text"
                 />
+
                 <button
                   onClick={handleCopy}
                   title="Copy URL"
@@ -342,6 +338,7 @@ export default function Landing() {
                 </button>
               </div>
             </div>
+
             <a
               href={visitUrl}
               target="_blank"
@@ -354,6 +351,20 @@ export default function Landing() {
           </div>
         )}
 
+        {previousDeployments.length > 0 && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black/50">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-white">
+                Previous Deployments
+              </h2>
+
+              <p className="text-sm text-zinc-500 mt-1">
+                Your latest deployed projects.
+              </p>
+            </div>
+          </div>
+        )}
+
         <p className="text-center text-xs text-zinc-700">
           Powered by <span className="text-zinc-500">DeployX</span> · Private
           &amp; Secure
@@ -362,10 +373,20 @@ export default function Landing() {
 
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        .animate-fadeIn { animation: fadeIn 0.35s ease forwards; }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.35s ease forwards;
+        }
       `}</style>
     </main>
   );

@@ -18,13 +18,13 @@ async function main() {
 
       const id = response?.element;
       uniqueId = id;
+
       await downloadS3Folder(`output/${response?.element}`);
       console.log("Downloaded");
 
       if (id) {
         await buildProject(id);
         copyFinalDist(id);
-
         publisher.hSet("status", id, "deployed");
       }
     } catch (e) {
