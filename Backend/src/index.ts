@@ -14,6 +14,38 @@ app.use(
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
+function protectRouteMiddleware(req: any, res: any, next: any) {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Login / Signup to use the service",
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (!decoded) {
+      return res.status(401).json({
+        message: "Unauthorized access",
+      });
+    }
+
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
+  }
+}
+
+app.get("/landing", protectRouteMiddleware, (req, res) => {
+  res.status(200).json({
+    message: "Welcome to DeployX",
+  });
+});
+
 app.post("/signup", async (req, res) => {
   try {
     const { name, password, email } = req.body;
@@ -37,6 +69,13 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
+    const jwt_token = localStorage.getItem("token");
+
+    if (jwt_token) {
+      res.status(200).json({ jwt_token });
+      return;
+    }
+
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -51,9 +90,9 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "5d",
     });
-
+    localStorage.setItem("token", token);
     res.status(200).json({ token });
   } catch (e) {
     res.status(500).json({ error: "Internal server error" });
