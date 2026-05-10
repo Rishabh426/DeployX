@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getUserIdFromToken } from "../utils/auth";
 
 const BACKEND_UPLOAD_URL = "http://localhost:3000";
 
@@ -77,6 +78,7 @@ export default function Landing() {
 
   const name = localStorage.getItem("name") || "User";
   const userInitial = name.charAt(0).toUpperCase();
+  const userId = getUserIdFromToken();
 
   const deployedUrl = `http://${uploadId}.rishabh.dev.com:3001/index.html`;
   const visitUrl = `http://${uploadId}.localhost:3001/index.html`;
@@ -89,6 +91,7 @@ export default function Landing() {
 
       const res = await axios.post(`${BACKEND_UPLOAD_URL}/deploy`, {
         repoUrl,
+        userId,
       });
 
       const deploymentId = res.data.id;
@@ -183,21 +186,20 @@ export default function Landing() {
     const fetchDeployments = async () => {
       try {
         const token = localStorage.getItem("token");
-
+        console.log(userId);
         const response = await axios.get(`${BACKEND_UPLOAD_URL}/deployments`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          params: { userId },
         });
 
-        setPreviousDeployments(response.data.slice(0, 3));
+        setPreviousDeployments(response.data.deployments.slice(0, 3));
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchDeployments();
-  }, []);
+  }, [deployed]);
 
   return (
     <main className="min-h-screen bg-zinc-950 font-sans overflow-y-auto">
@@ -355,12 +357,71 @@ export default function Landing() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black/50">
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-white">
-                Previous Deployments
+                Recent Deployments
               </h2>
-
               <p className="text-sm text-zinc-500 mt-1">
                 Your latest deployed projects.
               </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {previousDeployments.map((deployment: any) => (
+                <div
+                  key={deployment.id}
+                  className="flex items-center justify-between gap-3 bg-zinc-800/40 border border-zinc-800 rounded-xl px-4 py-3 hover:bg-zinc-800/60 transition-colors duration-150"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-700/60 border border-zinc-700 flex items-center justify-center text-zinc-400">
+                      <GitHubIcon />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm text-zinc-200 font-medium truncate">
+                        {deployment.repoUrl
+                          ? deployment.repoUrl.replace(
+                              "https://github.com/",
+                              "",
+                            )
+                          : "Unknown repo"}
+                      </p>
+                      <p className="text-xs text-zinc-600 font-mono mt-0.5">
+                        {deployment.id}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {deployment.status === "deployed" ? (
+                      <>
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-900/30 border border-emerald-800/50 rounded-full px-2.5 py-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          Live
+                        </span>
+                        {deployment.deployedUrl && (
+                          <a
+                            href={deployment.deployedUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all duration-150"
+                            title="Visit site"
+                          >
+                            <ExternalLinkIcon />
+                          </a>
+                        )}
+                      </>
+                    ) : deployment.status === "failed" ? (
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-red-400 bg-red-950/40 border border-red-900/50 rounded-full px-2.5 py-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        Failed
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-yellow-400 bg-yellow-900/20 border border-yellow-800/40 rounded-full px-2.5 py-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                        Building
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -1,0 +1,20 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model DeploymentHistory {
+  id              String   @id
+  userId          String
+  deployedId      String   @unique
+  githubUrl       String
+  deployedAt      DateTime @default(now())
+  timeTakenToDeploy Int
+
+  createdAt       DateTime @default(now())
+}

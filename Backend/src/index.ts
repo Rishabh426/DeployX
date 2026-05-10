@@ -59,9 +59,14 @@ app.post("/signup", async (req, res) => {
     const user = await prisma.user.create({
       data: { email, password, name },
     });
+
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "5d",
+    });
+
     res
       .status(201)
-      .json({ message: "User created successfully", name: user.name });
+      .json({ message: "User created successfully", name: user.name, token });
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: "Internal server error" });

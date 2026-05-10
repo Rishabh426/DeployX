@@ -20,6 +20,7 @@ app.use(express.json());
 
 app.post("/deploy", async (req, res) => {
   const repoUrl = req.body.repoUrl;
+  const userId = req.body.userId;
   let owner = "";
   let repo = "";
 
@@ -69,8 +70,6 @@ app.post("/deploy", async (req, res) => {
       return;
     }
   } catch (err: any) {
-    // GitHub returns 404 for private repos when unauthenticated
-    // so we treat 404 as a private repo, not an invalid one
     if (err?.response?.status === 404) {
       res.status(400).json({
         success: false,
@@ -99,7 +98,42 @@ app.post("/deploy", async (req, res) => {
 
   publisher.hSet("status", id, "uploaded");
 
+  await publisher.hSet(`deployment:${id}`, {
+    id,
+    repoUrl,
+    userId,
+    status: "uploaded",
+    createdAt: Date.now().toString(),
+    deployedUrl: `http://${id}.rishabh.dev.com:3001/index.html`,
+  });
+
+  await publisher.lPush(`user:${userId}:deployments`, id);
+  console.log("saved deployment:", id, "for user:", userId);
+  const check = await publisher.lRange(`user:${userId}:deployments`, 0, -1);
+  console.log("user deployments list:", check);
   res.json({ id });
+});
+
+app.get("/deployments", async (req, res) => {
+  const userId = req.query.userId as string;
+
+  if (!userId) {
+    res.status(400).json({ error: "userId is required" });
+    return;
+  }
+
+  const ids = await subscriber.lRange(`user:${userId}:deployments`, 0, -1);
+
+  if (ids.length === 0) {
+    res.json({ deployments: [] });
+    return;
+  }
+
+  const deployments = await Promise.all(
+    ids.map((id) => subscriber.hGetAll(`deployment:${id}`)),
+  );
+
+  res.json({ deployments });
 });
 
 app.get("/status", async (req, res) => {
