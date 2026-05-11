@@ -1,15 +1,17 @@
 import { S3 } from "aws-sdk";
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
 
 const s3 = new S3({
-  accessKeyId: "825a1c7ffa7a58bd9b2a88d2cdd0724e",
-  secretAccessKey:
-    "bf4afe3bfcf2abba7aa7e55d5e9802a6f38a3d7518410b5b98bd8707298bb6bc",
-  endpoint: "https://3ed379d7938b7fe8529a55c36d305443.r2.cloudflarestorage.com",
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  endpoint: process.env.AWS_ENDPOINT,
 });
 
 export async function downloadS3Folder(prefix: string) {
+  console.log(process.env.accessKeyId);
   const allFiles = await s3
     .listObjectsV2({
       Bucket: "deployx",

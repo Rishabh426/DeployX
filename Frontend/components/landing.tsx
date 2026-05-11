@@ -81,8 +81,8 @@ export default function Landing() {
   const userInitial = name.charAt(0).toUpperCase();
   const userId = getUserIdFromToken();
 
-  const deployedUrl = `http://${uploadId}.rishabh.dev.com:3001/index.html`;
-  const visitUrl = `http://${uploadId}.localhost:3001/index.html`;
+  const deployedUrl = `http://localhost:3001/${uploadId}/index.html`;
+  const visitUrl = `http://localhost:3001/${uploadId}/index.html`;
 
   const handleDeploy = async () => {
     const startTime = Date.now();
@@ -116,8 +116,7 @@ export default function Landing() {
               userId,
               repoUrl,
               status: "deployed",
-              deployedUrl:
-                "http://${deploymentId}.rishabh.dev.com:3001/index.html",
+              deployedUrl: `http://localhost:3001/${deploymentId}/index.html`,
               timeTaken: Math.round((Date.now() - startTime) / 1000),
             });
           }

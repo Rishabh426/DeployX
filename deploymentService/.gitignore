@@ -1,6 +1,7 @@
 node_modules/
 .envnode_modules/
 output/
+dist/
 dist/node_modules/
 
 /generated/prisma

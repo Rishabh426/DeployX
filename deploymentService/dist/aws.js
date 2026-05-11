@@ -18,14 +18,17 @@ exports.copyFinalDist = copyFinalDist;
 const aws_sdk_1 = require("aws-sdk");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const s3 = new aws_sdk_1.S3({
-    accessKeyId: "825a1c7ffa7a58bd9b2a88d2cdd0724e",
-    secretAccessKey: "bf4afe3bfcf2abba7aa7e55d5e9802a6f38a3d7518410b5b98bd8707298bb6bc",
-    endpoint: "https://3ed379d7938b7fe8529a55c36d305443.r2.cloudflarestorage.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    endpoint: process.env.AWS_ENDPOINT,
 });
 function downloadS3Folder(prefix) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
+        console.log(process.env.accessKeyId);
         const allFiles = yield s3
             .listObjectsV2({
             Bucket: "deployx",
