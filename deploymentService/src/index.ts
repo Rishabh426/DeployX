@@ -26,19 +26,10 @@ async function main() {
         await buildProject(id);
         copyFinalDist(id);
         publisher.hSet("status", id, "deployed");
-        await publisher.hSet(`deployment:${id}`, {
-          status: "deployed",
-          deployedUrl: `http://${id}.rishabh.dev.com:3001/index.html`,
-        });
       }
     } catch (e) {
-      console.log(`Deployment failed:${uniqueId}`);
+      console.log(`Deployment failed: ${uniqueId}`);
       await publisher.hSet("status", uniqueId, "failed");
-      await publisher.hSet(`deployment:${uniqueId}`, {
-        status: "failed",
-        deployedUrl: "",
-        failedAt: Date.now().toString(),
-      });
     }
   }
 }

@@ -31,20 +31,11 @@ function main() {
                     yield (0, utils_1.buildProject)(id);
                     (0, aws_1.copyFinalDist)(id);
                     publisher.hSet("status", id, "deployed");
-                    yield publisher.hSet(`deployment:${id}`, {
-                        status: "deployed",
-                        deployedUrl: `http://${id}.rishabh.dev.com:3001/index.html`,
-                    });
                 }
             }
             catch (e) {
-                console.log(`Deployment failed:${uniqueId}`);
+                console.log(`Deployment failed: ${uniqueId}`);
                 yield publisher.hSet("status", uniqueId, "failed");
-                yield publisher.hSet(`deployment:${uniqueId}`, {
-                    status: "failed",
-                    deployedUrl: "",
-                    failedAt: Date.now().toString(),
-                });
             }
         }
     });

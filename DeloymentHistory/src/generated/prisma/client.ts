@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more DeploymentHistories
- * const deploymentHistories = await prisma.deploymentHistory.findMany()
+ * // Fetch zero or more Deployments
+ * const deployments = await prisma.deployment.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,7 +42,7 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model DeploymentHistory
+ * Model Deployment
  * 
  */
-export type DeploymentHistory = Prisma.DeploymentHistoryModel
+export type Deployment = Prisma.DeploymentModel

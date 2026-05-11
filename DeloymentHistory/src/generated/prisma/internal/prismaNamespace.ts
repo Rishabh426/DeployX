@@ -384,7 +384,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  DeploymentHistory: 'DeploymentHistory'
+  Deployment: 'Deployment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -400,81 +400,81 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "deploymentHistory"
+    modelProps: "deployment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    DeploymentHistory: {
-      payload: Prisma.$DeploymentHistoryPayload<ExtArgs>
-      fields: Prisma.DeploymentHistoryFieldRefs
+    Deployment: {
+      payload: Prisma.$DeploymentPayload<ExtArgs>
+      fields: Prisma.DeploymentFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.DeploymentHistoryFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload> | null
+          args: Prisma.DeploymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.DeploymentHistoryFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         findFirst: {
-          args: Prisma.DeploymentHistoryFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload> | null
+          args: Prisma.DeploymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.DeploymentHistoryFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         findMany: {
-          args: Prisma.DeploymentHistoryFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>[]
+          args: Prisma.DeploymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>[]
         }
         create: {
-          args: Prisma.DeploymentHistoryCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         createMany: {
-          args: Prisma.DeploymentHistoryCreateManyArgs<ExtArgs>
+          args: Prisma.DeploymentCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.DeploymentHistoryCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>[]
+          args: Prisma.DeploymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>[]
         }
         delete: {
-          args: Prisma.DeploymentHistoryDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         update: {
-          args: Prisma.DeploymentHistoryUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         deleteMany: {
-          args: Prisma.DeploymentHistoryDeleteManyArgs<ExtArgs>
+          args: Prisma.DeploymentDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.DeploymentHistoryUpdateManyArgs<ExtArgs>
+          args: Prisma.DeploymentUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.DeploymentHistoryUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>[]
+          args: Prisma.DeploymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>[]
         }
         upsert: {
-          args: Prisma.DeploymentHistoryUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentHistoryPayload>
+          args: Prisma.DeploymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeploymentPayload>
         }
         aggregate: {
-          args: Prisma.DeploymentHistoryAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateDeploymentHistory>
+          args: Prisma.DeploymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDeployment>
         }
         groupBy: {
-          args: Prisma.DeploymentHistoryGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.DeploymentHistoryGroupByOutputType>[]
+          args: Prisma.DeploymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeploymentGroupByOutputType>[]
         }
         count: {
-          args: Prisma.DeploymentHistoryCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.DeploymentHistoryCountAggregateOutputType> | number
+          args: Prisma.DeploymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeploymentCountAggregateOutputType> | number
         }
       }
     }
@@ -517,17 +517,17 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const DeploymentHistoryScalarFieldEnum = {
+export const DeploymentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  deployedId: 'deployedId',
-  githubUrl: 'githubUrl',
-  deployedAt: 'deployedAt',
-  timeTakenToDeploy: 'timeTakenToDeploy',
-  createdAt: 'createdAt'
+  repoUrl: 'repoUrl',
+  status: 'status',
+  deployedUrl: 'deployedUrl',
+  createdAt: 'createdAt',
+  timeTaken: 'timeTaken'
 } as const
 
-export type DeploymentHistoryScalarFieldEnum = (typeof DeploymentHistoryScalarFieldEnum)[keyof typeof DeploymentHistoryScalarFieldEnum]
+export type DeploymentScalarFieldEnum = (typeof DeploymentScalarFieldEnum)[keyof typeof DeploymentScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -544,6 +544,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -717,7 +725,7 @@ export type PrismaClientOptions = ({
   queryPlanCacheMaxSize?: number
 }
 export type GlobalOmitConfig = {
-  deploymentHistory?: Prisma.DeploymentHistoryOmit
+  deployment?: Prisma.DeploymentOmit
 }
 
 /* Types for Logging */

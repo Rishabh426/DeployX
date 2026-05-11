@@ -8,13 +8,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model DeploymentHistory {
-  id              String   @id
-  userId          String
-  deployedId      String   @unique
-  githubUrl       String
-  deployedAt      DateTime @default(now())
-  timeTakenToDeploy Int
-
-  createdAt       DateTime @default(now())
+model Deployment {
+  id          String   @id
+  userId      String
+  repoUrl     String
+  status      String
+  deployedUrl String?
+  createdAt   DateTime @default(now())
+  timeTaken   Int?
 }

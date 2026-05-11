@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getUserIdFromToken } from "../utils/auth";
+import { saveDeployment } from "../utils/history";
 
 const BACKEND_UPLOAD_URL = "http://localhost:3000";
 
@@ -109,10 +110,29 @@ export default function Landing() {
           if (response.data.status === "deployed") {
             clearInterval(interval);
             setDeployed(true);
+
+            await saveDeployment({
+              id: deploymentId,
+              userId,
+              repoUrl,
+              status: "deployed",
+              deployedUrl:
+                "http://${deploymentId}.rishabh.dev.com:3001/index.html",
+              timeTaken: Math.round((Date.now() - startTime) / 1000),
+            });
           }
 
           if (response.data.status === "failed") {
             clearInterval(interval);
+
+            await saveDeployment({
+              id: deploymentId,
+              userId,
+              repoUrl,
+              status: "failed",
+              deployedUrl: "",
+              timeTaken: Math.round((Date.now() - startTime) / 1000),
+            });
 
             navigate("/deploy-failed", {
               state: {
@@ -185,20 +205,16 @@ export default function Landing() {
   useEffect(() => {
     const fetchDeployments = async () => {
       try {
-        const token = localStorage.getItem("token");
-        console.log(userId);
-        const response = await axios.get(`${BACKEND_UPLOAD_URL}/deployments`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { userId },
-        });
-
+        const response = await axios.get(
+          `http://localhost:4000/history/${userId}`,
+        );
         setPreviousDeployments(response.data.deployments.slice(0, 3));
       } catch (err) {
         console.log(err);
       }
     };
 
-    fetchDeployments();
+    if (userId) fetchDeployments();
   }, [deployed]);
 
   return (

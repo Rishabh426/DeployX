@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.8.0",
   "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel DeploymentHistory {\n  id                String   @id\n  userId            String\n  deployedId        String   @unique\n  githubUrl         String\n  deployedAt        DateTime @default(now())\n  timeTakenToDeploy Int\n\n  createdAt DateTime @default(now())\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Deployment {\n  id          String   @id\n  userId      String\n  repoUrl     String\n  status      String\n  deployedUrl String?\n  createdAt   DateTime @default(now())\n  timeTaken   Int?\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -32,10 +32,10 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"DeploymentHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"deployedId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"githubUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"deployedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"timeTakenToDeploy\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Deployment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"repoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"deployedUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"timeTaken\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 config.parameterizationSchema = {
-  strings: JSON.parse("[\"where\",\"DeploymentHistory.findUnique\",\"DeploymentHistory.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"DeploymentHistory.findFirst\",\"DeploymentHistory.findFirstOrThrow\",\"DeploymentHistory.findMany\",\"data\",\"DeploymentHistory.createOne\",\"DeploymentHistory.createMany\",\"DeploymentHistory.createManyAndReturn\",\"DeploymentHistory.updateOne\",\"DeploymentHistory.updateMany\",\"DeploymentHistory.updateManyAndReturn\",\"create\",\"update\",\"DeploymentHistory.upsertOne\",\"DeploymentHistory.deleteOne\",\"DeploymentHistory.deleteMany\",\"having\",\"_count\",\"_avg\",\"_sum\",\"_min\",\"_max\",\"DeploymentHistory.groupBy\",\"DeploymentHistory.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"userId\",\"deployedId\",\"githubUrl\",\"deployedAt\",\"timeTakenToDeploy\",\"createdAt\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"set\",\"increment\",\"decrement\",\"multiply\",\"divide\"]"),
-  graph: "MAsQChwAACUAMB0AAAQAEB4AACUAMB8BAAAAASABACYAISEBAAAAASIBACYAISNAACcAISQCACgAISVAACcAIQEAAAABACABAAAAAQAgChwAACUAMB0AAAQAEB4AACUAMB8BACYAISABACYAISEBACYAISIBACYAISNAACcAISQCACgAISVAACcAIQADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACAHHwEAAAABIAEAAAABIQEAAAABIgEAAAABI0AAAAABJAIAAAABJUAAAAABAQgAAAkAIAcfAQAAAAEgAQAAAAEhAQAAAAEiAQAAAAEjQAAAAAEkAgAAAAElQAAAAAEBCAAACwAwAQgAAAsAMAcfAQAuACEgAQAuACEhAQAuACEiAQAuACEjQAAvACEkAgAwACElQAAvACECAAAAAQAgCAAADgAgBx8BAC4AISABAC4AISEBAC4AISIBAC4AISNAAC8AISQCADAAISVAAC8AIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgBRUAACkAIBYAACoAIBcAAC0AIBgAACwAIBkAACsAIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjQAAcACEkAgAdACElQAAcACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjQAAcACEkAgAdACElQAAcACEOFQAAHwAgGAAAJAAgGQAAJAAgJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAIwAhLgEAAAABLwEAAAABMAEAAAABCxUAAB8AIBgAACIAIBkAACIAICZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACEAIQ0VAAAfACAWAAAgACAXAAAfACAYAAAfACAZAAAfACAmAgAAAAEnAgAAAAQoAgAAAAQpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAeACENFQAAHwAgFgAAIAAgFwAAHwAgGAAAHwAgGQAAHwAgJgIAAAABJwIAAAAEKAIAAAAEKQIAAAABKgIAAAABKwIAAAABLAIAAAABLQIAHgAhCCYCAAAAAScCAAAABCgCAAAABCkCAAAAASoCAAAAASsCAAAAASwCAAAAAS0CAB8AIQgmCAAAAAEnCAAAAAQoCAAAAAQpCAAAAAEqCAAAAAErCAAAAAEsCAAAAAEtCAAgACELFQAAHwAgGAAAIgAgGQAAIgAgJkAAAAABJ0AAAAAEKEAAAAAEKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAIQAhCCZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACIAIQ4VAAAfACAYAAAkACAZAAAkACAmAQAAAAEnAQAAAAQoAQAAAAQpAQAAAAEqAQAAAAErAQAAAAEsAQAAAAEtAQAjACEuAQAAAAEvAQAAAAEwAQAAAAELJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAJAAhLgEAAAABLwEAAAABMAEAAAABChwAACUAMB0AAAQAEB4AACUAMB8BACYAISABACYAISEBACYAISIBACYAISNAACcAISQCACgAISVAACcAIQsmAQAAAAEnAQAAAAQoAQAAAAQpAQAAAAEqAQAAAAErAQAAAAEsAQAAAAEtAQAkACEuAQAAAAEvAQAAAAEwAQAAAAEIJkAAAAABJ0AAAAAEKEAAAAAEKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAIgAhCCYCAAAAAScCAAAABCgCAAAABCkCAAAAASoCAAAAASsCAAAAASwCAAAAAS0CAB8AIQAAAAAAATEBAAAAAQExQAAAAAEFMQIAAAABMgIAAAABMwIAAAABNAIAAAABNQIAAAABAAAAAAUVAAYWAAcXAAgYAAkZAAoAAAAAAAUVAAYWAAcXAAgYAAkZAAoBAgECAwEFBgEGBwEHCAEJCgEKDAILDQMMDwENEQIOEgQREwESFAETFQIaGAUbGQs"
+  strings: JSON.parse("[\"where\",\"Deployment.findUnique\",\"Deployment.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"Deployment.findFirst\",\"Deployment.findFirstOrThrow\",\"Deployment.findMany\",\"data\",\"Deployment.createOne\",\"Deployment.createMany\",\"Deployment.createManyAndReturn\",\"Deployment.updateOne\",\"Deployment.updateMany\",\"Deployment.updateManyAndReturn\",\"create\",\"update\",\"Deployment.upsertOne\",\"Deployment.deleteOne\",\"Deployment.deleteMany\",\"having\",\"_count\",\"_avg\",\"_sum\",\"_min\",\"_max\",\"Deployment.groupBy\",\"Deployment.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"userId\",\"repoUrl\",\"status\",\"deployedUrl\",\"createdAt\",\"timeTaken\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"set\",\"increment\",\"decrement\",\"multiply\",\"divide\"]"),
+  graph: "NwsQChwAACkAMB0AAAQAEB4AACkAMB8BAAAAASABACoAISEBACoAISIBACoAISMBACsAISRAACwAISUCAC0AIQEAAAABACABAAAAAQAgChwAACkAMB0AAAQAEB4AACkAMB8BACoAISABACoAISEBACoAISIBACoAISMBACsAISRAACwAISUCAC0AIQIjAAAuACAlAAAuACADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACAHHwEAAAABIAEAAAABIQEAAAABIgEAAAABIwEAAAABJEAAAAABJQIAAAABAQgAAAkAIAcfAQAAAAEgAQAAAAEhAQAAAAEiAQAAAAEjAQAAAAEkQAAAAAElAgAAAAEBCAAACwAwAQgAAAsAMAcfAQA0ACEgAQA0ACEhAQA0ACEiAQA0ACEjAQA1ACEkQAA2ACElAgA3ACECAAAAAQAgCAAADgAgBx8BADQAISABADQAISEBADQAISIBADQAISMBADUAISRAADYAISUCADcAIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgBxUAAC8AIBYAADAAIBcAADMAIBgAADIAIBkAADEAICMAAC4AICUAAC4AIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjAQAcACEkQAAdACElAgAeACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjAQAcACEkQAAdACElAgAeACEOFQAAIwAgGAAAKAAgGQAAKAAgJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAJwAhLgEAAAABLwEAAAABMAEAAAABDhUAACAAIBgAACYAIBkAACYAICYBAAAAAScBAAAABSgBAAAABSkBAAAAASoBAAAAASsBAAAAASwBAAAAAS0BACUAIS4BAAAAAS8BAAAAATABAAAAAQsVAAAjACAYAAAkACAZAAAkACAmQAAAAAEnQAAAAAQoQAAAAAQpQAAAAAEqQAAAAAErQAAAAAEsQAAAAAEtQAAiACENFQAAIAAgFgAAIQAgFwAAIAAgGAAAIAAgGQAAIAAgJgIAAAABJwIAAAAFKAIAAAAFKQIAAAABKgIAAAABKwIAAAABLAIAAAABLQIAHwAhDRUAACAAIBYAACEAIBcAACAAIBgAACAAIBkAACAAICYCAAAAAScCAAAABSgCAAAABSkCAAAAASoCAAAAASsCAAAAASwCAAAAAS0CAB8AIQgmAgAAAAEnAgAAAAUoAgAAAAUpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAgACEIJggAAAABJwgAAAAFKAgAAAAFKQgAAAABKggAAAABKwgAAAABLAgAAAABLQgAIQAhCxUAACMAIBgAACQAIBkAACQAICZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACIAIQgmAgAAAAEnAgAAAAQoAgAAAAQpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAjACEIJkAAAAABJ0AAAAAEKEAAAAAEKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAJAAhDhUAACAAIBgAACYAIBkAACYAICYBAAAAAScBAAAABSgBAAAABSkBAAAAASoBAAAAASsBAAAAASwBAAAAAS0BACUAIS4BAAAAAS8BAAAAATABAAAAAQsmAQAAAAEnAQAAAAUoAQAAAAUpAQAAAAEqAQAAAAErAQAAAAEsAQAAAAEtAQAmACEuAQAAAAEvAQAAAAEwAQAAAAEOFQAAIwAgGAAAKAAgGQAAKAAgJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAJwAhLgEAAAABLwEAAAABMAEAAAABCyYBAAAAAScBAAAABCgBAAAABCkBAAAAASoBAAAAASsBAAAAASwBAAAAAS0BACgAIS4BAAAAAS8BAAAAATABAAAAAQocAAApADAdAAAEABAeAAApADAfAQAqACEgAQAqACEhAQAqACEiAQAqACEjAQArACEkQAAsACElAgAtACELJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAKAAhLgEAAAABLwEAAAABMAEAAAABCyYBAAAAAScBAAAABSgBAAAABSkBAAAAASoBAAAAASsBAAAAASwBAAAAAS0BACYAIS4BAAAAAS8BAAAAATABAAAAAQgmQAAAAAEnQAAAAAQoQAAAAAQpQAAAAAEqQAAAAAErQAAAAAEsQAAAAAEtQAAkACEIJgIAAAABJwIAAAAFKAIAAAAFKQIAAAABKgIAAAABKwIAAAABLAIAAAABLQIAIAAhAAAAAAAAATEBAAAAAQExAQAAAAEBMUAAAAABBTECAAAAATICAAAAATMCAAAAATQCAAAAATUCAAAAAQAAAAAFFQAGFgAHFwAIGAAJGQAKAAAAAAAFFQAGFgAHFwAIGAAJGQAKAQIBAgMBBQYBBgcBBwgBCQoBCgwCCw0DDA8BDRECDhIEERMBEhQBExUCGhgFGxkL"
 }
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
@@ -70,8 +70,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more DeploymentHistories
-   * const deploymentHistories = await prisma.deploymentHistory.findMany()
+   * // Fetch zero or more Deployments
+   * const deployments = await prisma.deployment.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -94,8 +94,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more DeploymentHistories
- * const deploymentHistories = await prisma.deploymentHistory.findMany()
+ * // Fetch zero or more Deployments
+ * const deployments = await prisma.deployment.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -189,14 +189,14 @@ export interface PrismaClient<
   }>>
 
       /**
-   * `prisma.deploymentHistory`: Exposes CRUD operations for the **DeploymentHistory** model.
+   * `prisma.deployment`: Exposes CRUD operations for the **Deployment** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more DeploymentHistories
-    * const deploymentHistories = await prisma.deploymentHistory.findMany()
+    * // Fetch zero or more Deployments
+    * const deployments = await prisma.deployment.findMany()
     * ```
     */
-  get deploymentHistory(): Prisma.DeploymentHistoryDelegate<ExtArgs, { omit: OmitOpts }>;
+  get deployment(): Prisma.DeploymentDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {
